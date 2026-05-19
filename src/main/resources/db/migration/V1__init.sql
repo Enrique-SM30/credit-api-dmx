@@ -1,6 +1,3 @@
--- V1__init.sql
--- Tabla principal de solicitudes de crédito
-
 CREATE TABLE credit_applications (
     id                   UUID           PRIMARY KEY,
     customer_name        VARCHAR(120)   NOT NULL,

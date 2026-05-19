@@ -4,6 +4,7 @@ import com.dmx.credit_api.application.services.ChangeStatusService;
 import com.dmx.credit_api.domain.exception.InvalidStatusTransitionException;
 import com.dmx.credit_api.domain.model.CreditApplication;
 import com.dmx.credit_api.domain.model.CreditStatus;
+import com.dmx.credit_api.domain.port.out.CreditApplicationEventRepository;
 import com.dmx.credit_api.domain.port.out.CreditApplicationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,11 +27,14 @@ public class ChangeStatusServiceTest {
     @Mock
     private CreditApplicationRepository repository;
 
+    @Mock
+    private CreditApplicationEventRepository eventRepository;
+
     private ChangeStatusService service;
 
     @BeforeEach
     void setUp() {
-        service = new ChangeStatusService(repository);
+        service = new ChangeStatusService(repository, eventRepository);
     }
 
     private CreditApplication createApplication() {
