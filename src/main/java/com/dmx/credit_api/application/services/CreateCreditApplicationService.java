@@ -44,11 +44,15 @@ public class CreateCreditApplicationService implements CreateCreditApplicationUs
             ratesOptions.ifPresentOrElse(
                     result -> {
                         application.setExchangeRates(result.getRate(Constants.CURRENCY_USD), result.getRate(Constants.CURRENCY_EUR), result.date());
+
+                        log.info("Tipos de cambio obtenidos correctamente para solicitud {}",
+                                application.getId());
                     },
-                    () -> log.warn("")
+                    () -> log.warn("No se obtuvieron tipos de cambio para solicitud {}. Los campos amountUsd/amountEur quedarán en null.",
+                            application.getId())
             );
         } catch (Exception ex) {
-            log.error("Error in get of exchange types of request: {}", application.getId());
+            log.warn("Error in get of exchange types of request: {}", application.getId());
         }
 
         return repository.save(application);

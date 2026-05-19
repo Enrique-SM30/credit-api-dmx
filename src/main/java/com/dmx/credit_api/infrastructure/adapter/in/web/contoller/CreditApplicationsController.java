@@ -2,18 +2,15 @@ package com.dmx.credit_api.infrastructure.adapter.in.web.contoller;
 
 import com.dmx.credit_api.domain.model.CreditApplication;
 import com.dmx.credit_api.domain.model.CreditStatus;
-import com.dmx.credit_api.domain.port.in.CreateCreditApplicationUseCase;
-import com.dmx.credit_api.domain.port.in.GetCreditApplicationUseCase;
-import com.dmx.credit_api.domain.port.in.GetCreditApplicationsListQuery;
-import com.dmx.credit_api.domain.port.in.GetCreditApplicationsListUseCase;
+import com.dmx.credit_api.domain.model.PageRequest;
+import com.dmx.credit_api.domain.model.PageResult;
+import com.dmx.credit_api.domain.port.in.*;
+import com.dmx.credit_api.infrastructure.adapter.in.web.dto.ChangeStatusRequest;
 import com.dmx.credit_api.infrastructure.adapter.in.web.dto.CreateCreditApplicationRequest;
 import com.dmx.credit_api.infrastructure.adapter.in.web.dto.CreditApplicationResponse;
 import com.dmx.credit_api.infrastructure.adapter.in.web.mapper.CreditApplicationMapper;
 import com.dmx.credit_api.infrastructure.config.Constants;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,12 +25,14 @@ public class CreditApplicationsController {
     private final CreateCreditApplicationUseCase createCreditApplicationUseCase;
     private final GetCreditApplicationUseCase getCreditApplicationUseCase;
     private final GetCreditApplicationsListUseCase getCreditApplicationsListUseCase;
+    private final ChangeStatusUseCase changeStatusUseCase;
     private final CreditApplicationMapper creditApplicationMapper;
 
-    public CreditApplicationsController(CreateCreditApplicationUseCase createCreditApplicationUseCase, GetCreditApplicationUseCase getCreditApplicationUseCase, GetCreditApplicationsListUseCase getCreditApplicationsListUseCase, CreditApplicationMapper creditApplicationMapper) {
+    public CreditApplicationsController(CreateCreditApplicationUseCase createCreditApplicationUseCase, GetCreditApplicationUseCase getCreditApplicationUseCase, GetCreditApplicationsListUseCase getCreditApplicationsListUseCase, ChangeStatusUseCase changeStatusUseCase, CreditApplicationMapper creditApplicationMapper) {
         this.createCreditApplicationUseCase = createCreditApplicationUseCase;
         this.getCreditApplicationUseCase = getCreditApplicationUseCase;
         this.getCreditApplicationsListUseCase = getCreditApplicationsListUseCase;
+        this.changeStatusUseCase = changeStatusUseCase;
         this.creditApplicationMapper = creditApplicationMapper;
     }
 
@@ -53,7 +52,7 @@ public class CreditApplicationsController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<CreditApplicationResponse>> getApplicationsList(
+    public ResponseEntity<PageResult<CreditApplicationResponse>> getApplicationsList(
             @RequestParam(required = false) CreditStatus status,
             @RequestParam(required = false) String customerRfc,
             @RequestParam(required = false) BigDecimal minAmount,
@@ -61,22 +60,28 @@ public class CreditApplicationsController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize
     ){
-        PageRequest pageable = PageRequest.of(
-                page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")
-        );
+        PageRequest pageRequest = new PageRequest(page, pageSize);
 
         GetCreditApplicationsListQuery query =
                 new GetCreditApplicationsListQuery(status, customerRfc, minAmount, maxAmount);
 
-        Page<CreditApplicationResponse> result =
-                getCreditApplicationsListUseCase.execute(query, pageable).map(creditApplicationMapper::toResponse);
+        PageResult<CreditApplication> result =
+                getCreditApplicationsListUseCase.execute(query, pageRequest);
 
-        return ResponseEntity.ok(result);
+        PageResult<CreditApplicationResponse> response = new PageResult<>(
+                result.content().stream().map(creditApplicationMapper::toResponse).toList(),
+                result.page(),
+                result.pageSize(),
+                result.totalElements(),
+                result.totalPages()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<CreditApplicationResponse> changeStatus(@PathVariable String id){
-        URI location = URI.create("/api/v1/credit-applications/");
-        return ResponseEntity.created(location).body(null);
+    public ResponseEntity<CreditApplicationResponse> changeStatus(@PathVariable UUID id, @Valid @RequestBody ChangeStatusRequest request){
+        CreditApplication updated = changeStatusUseCase.execute(id, request.status(), request.reason());
+        return ResponseEntity.ok(creditApplicationMapper.toResponse(updated));
     }
 }

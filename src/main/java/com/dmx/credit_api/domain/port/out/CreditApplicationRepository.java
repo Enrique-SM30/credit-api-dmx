@@ -2,8 +2,8 @@ package com.dmx.credit_api.domain.port.out;
 
 import com.dmx.credit_api.domain.model.CreditApplication;
 import com.dmx.credit_api.domain.model.CreditStatus;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.dmx.credit_api.domain.model.PageRequest;
+import com.dmx.credit_api.domain.model.PageResult;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -14,5 +14,5 @@ public interface CreditApplicationRepository {
 
     Optional<CreditApplication> findById(UUID id);
 
-    Page<CreditApplication> findAll(CreditStatus status, String customerRfc, BigDecimal minAmount, BigDecimal maxAmount, Pageable pageable);
+    PageResult<CreditApplication> findAll(CreditStatus status, String customerRfc, BigDecimal minAmount, BigDecimal maxAmount, PageRequest pageRequest);
 }
