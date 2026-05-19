@@ -7,10 +7,11 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate          # Flyway gestiona el esquema; JPA solo valida
-    show-sql: false
+      ddl-auto: none
+    show-sql: true
     properties:
       hibernate:
+        globally_quoted_identifiers: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
@@ -32,3 +33,11 @@ logging:
   level:
     com.dmx.credit: INFO
     org.flywaydb: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
