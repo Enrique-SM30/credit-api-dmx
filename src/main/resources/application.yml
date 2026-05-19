@@ -20,6 +20,11 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: false
 
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=100,expireAfterWrite=3600s
+
 external:
   frankfurter:
     base-url: ${EXTERNAL_FRANKFURTER_URL:https://api.frankfurter.dev/v1}
@@ -35,6 +40,7 @@ logging:
     org.flywaydb: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+    org.springframework.cache: TRACE
 
 springdoc:
   api-docs:

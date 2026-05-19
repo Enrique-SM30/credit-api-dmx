@@ -3,6 +3,7 @@ package com.dmx.credit_api.infrastructure.adapter.out.external;
 import com.dmx.credit_api.domain.port.out.ExchangeRateProvider;
 import com.dmx.credit_api.domain.port.out.ExchangeRateResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -19,8 +20,10 @@ public class FrankfurterExchangeRateAdapter implements ExchangeRateProvider {
         this.restClient = restClient;
     }
 
+    @Cacheable(value = "exchangeRates", key = "#baseCurrency + '_' + #targetCurrencies")
     @Override
     public Optional<ExchangeRateResult> getRates(String baseCurrency, String... targetCurrencies) {
+        log.info("Consultando Frankfurter API...");
         String symbols = String.join(",", targetCurrencies);
         try {
 
