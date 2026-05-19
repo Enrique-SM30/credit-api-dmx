@@ -8,6 +8,9 @@ import com.dmx.credit_api.infrastructure.adapter.out.persistence.repository.Cred
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Component
 @Slf4j
 public class CreditApplicationJpaAdapter implements CreditApplicationRepository {
@@ -19,11 +22,15 @@ public class CreditApplicationJpaAdapter implements CreditApplicationRepository 
         this.mapper = mapper;
     }
 
-
     @Override
     public CreditApplication save(CreditApplication application) {
         CreditApplicationEntity saved = jpaRepository.save(mapper.toEntity(application));
         log.info(String.valueOf(saved));
         return mapper.toDomainEntity(saved);
+    }
+
+    @Override
+    public Optional<CreditApplication> findById(UUID id) {
+        return jpaRepository.findById(id).map(mapper::toDomainEntity);
     }
 }

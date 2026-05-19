@@ -2,6 +2,7 @@ package com.dmx.credit_api.infrastructure.adapter.in.web.contoller;
 
 import com.dmx.credit_api.domain.model.CreditApplication;
 import com.dmx.credit_api.domain.port.in.CreateCreditApplicationUseCase;
+import com.dmx.credit_api.domain.port.in.GetCreditApplicationUseCase;
 import com.dmx.credit_api.infrastructure.adapter.in.web.dto.CreateCreditApplicationRequest;
 import com.dmx.credit_api.infrastructure.adapter.in.web.dto.CreditApplicationResponse;
 import com.dmx.credit_api.infrastructure.adapter.in.web.mapper.CreditApplicationMapper;
@@ -10,16 +11,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/credit-applications")
 public class CreditApplicationsController {
 
     private final CreateCreditApplicationUseCase createCreditApplicationUseCase;
+    private final GetCreditApplicationUseCase getCreditApplicationUseCase;
     private final CreditApplicationMapper creditApplicationMapper;
 
-    public CreditApplicationsController(CreateCreditApplicationUseCase createCreditApplicationUseCase, CreditApplicationMapper creditApplicationMapper) {
+    public CreditApplicationsController(CreateCreditApplicationUseCase createCreditApplicationUseCase, GetCreditApplicationUseCase getCreditApplicationUseCase, CreditApplicationMapper creditApplicationMapper) {
         this.createCreditApplicationUseCase = createCreditApplicationUseCase;
+        this.getCreditApplicationUseCase = getCreditApplicationUseCase;
         this.creditApplicationMapper = creditApplicationMapper;
     }
 
@@ -33,9 +37,9 @@ public class CreditApplicationsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CreditApplicationResponse> getApplicationById(@PathVariable String id){
-        URI location = URI.create("/api/v1/credit-applications/");
-        return ResponseEntity.created(location).body(null);
+    public ResponseEntity<CreditApplicationResponse> getApplicationById(@PathVariable UUID id){
+        CreditApplication application = getCreditApplicationUseCase.execute(id);
+        return ResponseEntity.ok(creditApplicationMapper.toResponse(application));
     }
 
     @GetMapping

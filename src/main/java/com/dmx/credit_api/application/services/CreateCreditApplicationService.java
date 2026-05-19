@@ -9,11 +9,13 @@ import com.dmx.credit_api.domain.port.out.ExchangeRateResult;
 import com.dmx.credit_api.infrastructure.config.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Slf4j
 @Service
+@Transactional
 public class CreateCreditApplicationService implements CreateCreditApplicationUseCase {
 
     private final CreditApplicationRepository repository;
